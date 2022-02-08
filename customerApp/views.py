@@ -59,7 +59,7 @@ def orderViewAuthorization(tocken,order):
         user_id=tocken["user_id"]
     except:
         user_id=''
-    if user_id=='' or user_id!=order.customer:
+    if user_id=='' or user_id!=order["customer"]:
         return False
     return True
     
@@ -162,13 +162,12 @@ def apiOrder(request,id):
         order= CustomerOrder.objects.get(orderId=id)
     except CustomerOrder.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-
+    order_serializer=CustomerOrderSerializer(order,many=False)
     # Protect route
-    if orderViewAuthorization(request.tocken,order)==False:
+    if orderViewAuthorization(request.tocken,order_serializer.data)==False:
         return Response(status=status.HTTP_401_UNAUTHORIZED)
 
     if request.method == 'GET':
-        order_serializer=CustomerOrderSerializer(order,many=False)
         return Response(order_serializer.data,status=status.HTTP_200_OK)
     
     elif request.method == 'PUT':
